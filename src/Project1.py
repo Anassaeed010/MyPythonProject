@@ -8,6 +8,18 @@ def Info() :
     file=open("data/FileAnas.txt " ,"a")
     print(file.write( f" YourName:{Name} num of video you Witced:{VideosWathed} Score:{ScoreOFCoures} AmountofMonypaid:{Monypaid} \n") ) 
     
+def WorkingOnfile (): 
+    file = open("data/FileAnas.txt", "r", encoding="utf-8")
+    lines = file.readlines()
+    Totalsum = 0
+    count = 0
+    for line in lines:
+        print(line.split())
+    file.close()
 
-Info()    
+
+
+
+Info()
+WorkingOnfile()
          
