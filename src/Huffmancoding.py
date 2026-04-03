@@ -1,5 +1,5 @@
 import heapq
-from collections import defaultdict, Counter
+from collections import Counter
 
 class HuffmanNode:
     def __init__(self, char, freq):
@@ -18,8 +18,9 @@ class Huffman:
         self.num_of_chars = len(self.freq) 
         self.root = self.build_tree()
         self.codes = {}
-        self.build_codes(self.root, "")
+        self.build_codes(self.root)
         self.encoded_text = self.encode(text)
+        # ✅ الإصلاح ١: كل حرف = 8 بت بغض النظر عن الترميز
         self.original_bits = len(text) * 8
         self.compressed_bits = len(self.encoded_text)
 
@@ -35,26 +36,34 @@ class Huffman:
             heapq.heappush(pq, merged)
         return pq[0] if pq else None
 
-    def build_codes(self, node, current_code):
-        if node is None:
+    # ✅ الإصلاح ٢: iterative بدلاً من recursive
+    def build_codes(self, root):
+        if root is None:
             return
-        elif node.char is not None:
-            self.codes[node.char] = current_code
+        # حالة خاصة: نص من حرف واحد فقط
+        if root.char is not None:
+            self.codes[root.char] = "0"
             return
-        self.build_codes(node.left, current_code + "0")
-        self.build_codes(node.right, current_code + "1")
+        stack = [(root, "")]
+        while stack:
+            node, current_code = stack.pop()
+            if node.char is not None:
+                self.codes[node.char] = current_code
+                continue
+            # نضيف اليمين أولاً حتى يُعالج اليسار أولاً (LIFO)
+            if node.right is not None:
+                stack.append((node.right, current_code + "1"))
+            if node.left is not None:
+                stack.append((node.left, current_code + "0"))
 
     def encode(self, text):
         return "".join(self.codes[char] for char in text)
 
     def decode(self, encoded_text):
         result = []
-        node = self.root
+        node = self.root 
         for bit in encoded_text:
-            if bit == "0":
-                node = node.left
-            else:
-                node = node.right
+            node = node.left if bit == "0" else node.right
             if node.char is not None:
                 result.append(node.char)
                 node = self.root
@@ -70,7 +79,6 @@ class Huffman:
         for char, code in self.codes.items():
             print(f"  '{char}': {code}")
 
-# Test the class
 if __name__ == "__main__":
     text = input("Enter text to compress: ")
     if text:
